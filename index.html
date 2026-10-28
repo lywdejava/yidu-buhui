@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="JPlEdlaGcypkwtihBkqAuq">
+<head data-page-node-id="dcnkPRQIC6Jz8T3Y0GAWin">
+<meta charset="utf-8" data-page-node-id="CUZaFAQJIjoMbB1SDcevH7">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" data-page-node-id="dz5ag8izGiMtd3y60ULXHt">
+<meta name="theme-color" content="#eaf3fb" data-page-node-id="lILcE8l0mOshRdRa3kXFNk">
+<title>已读不回 · 打工人一周生存指南</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
+    background:#eaf3fb;color:#1b2a38;overflow:hidden;
+    display:flex;justify-content:center;align-items:stretch;
+  }
+  #app{
+    width:100%;max-width:480px;height:100dvh;display:flex;flex-direction:column;
+    background:#f6fbff;position:relative;overflow:hidden;
+  }
+  /* ---------- 顶部 ---------- */
+  header{padding:14px 18px 8px;flex:0 0 auto}
+  .toprow{display:flex;align-items:baseline;justify-content:space-between}
+  h1{font-size:17px;font-weight:500;margin:0;letter-spacing:.5px;color:#12374f}
+  .day{font-size:12px;color:#5b7a8f;letter-spacing:1px}
+  .bars{display:flex;gap:10px;margin-top:10px}
+  .bar{flex:1}
+  .bar .lab{display:flex;justify-content:space-between;font-size:11px;color:#5b7a8f;margin-bottom:4px}
+  .bar .lab b{font-weight:500;color:#12374f;font-variant-numeric:tabular-nums}
+  .track{height:6px;border-radius:99px;background:#dceaf5;overflow:hidden}
+  .fill{height:100%;width:50%;border-radius:99px;transition:width .45s cubic-bezier(.3,.9,.3,1)}
+  .fill.boss{background:#378ADD}
+  .fill.peer{background:#1D9E75}
+  .fill.spirit{background:#D4537E}
+  .progress{display:flex;gap:4px;margin-top:12px}
+  .pd{flex:1;height:3px;border-radius:99px;background:#dceaf5}
+  .pd.done{background:#85b7eb}
+  /* ---------- 卡牌 ---------- */
+  #stage{flex:1 1 auto;position:relative;display:flex;align-items:center;justify-content:center;padding:6px 16px 0;min-height:0}
+  .card{
+    width:100%;height:100%;max-height:100%;border-radius:20px;background:#fff;
+    border:1px solid #d8e8f5;display:flex;flex-direction:column;overflow:hidden;
+    position:relative;touch-action:none;user-select:none;
+    box-shadow:0 6px 24px rgba(18,55,79,.07);
+  }
+  .art{flex:1 1 55%;position:relative;overflow:hidden;background:#dfeefb;min-height:0}
+  .art img{width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block}
+  .art .ph{
+    position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;
+    background:linear-gradient(160deg,#e8f3fc 0%,#d7e9f8 60%,#c9dff2 100%);
+  }
+  .art .ph .big{font-size:64px;font-weight:500;color:#b6d2e8;line-height:1;letter-spacing:2px}
+  .art .ph .sm{font-size:12px;color:#8fadc2;letter-spacing:6px;margin-top:10px}
+  .art .tagline{
+    position:absolute;left:12px;top:12px;font-size:11px;letter-spacing:2px;color:#12374f;
+    background:rgba(255,255,255,.86);padding:4px 9px;border-radius:99px;
+  }
+  .txt{padding:16px 18px 4px;flex:0 0 auto}
+  .txt p{margin:0;font-size:15px;line-height:1.7;color:#1b2a38}
+  .swipe{display:flex;justify-content:space-between;padding:8px 18px 12px;font-size:11px;color:#93b0c4;letter-spacing:1px}
+  /* ---------- 选项按钮 ---------- */
+  .choices{flex:0 0 auto;display:flex;gap:10px;padding:0 16px 18px}
+  .choice{
+    flex:1;border-radius:14px;border:1px solid #cfe3f4;background:#fff;padding:13px 12px;
+    font-family:inherit;font-size:13.5px;line-height:1.5;color:#1b2a38;text-align:left;
+    display:flex;flex-direction:column;gap:6px;min-height:84px;cursor:pointer;transition:.15s;
+  }
+  .choice:active{transform:scale(.975)}
+  .choice .hint{font-size:11px;color:#93b0c4;letter-spacing:1px}
+  .choice.left .hint{color:#c98a8a}
+  .choice.right .hint{color:#7fa8cc}
+  /* ---------- 反馈浮层 ---------- */
+  #toast{
+    position:absolute;left:16px;right:16px;bottom:110px;background:rgba(18,55,79,.94);color:#eaf3fb;
+    padding:14px 16px;border-radius:14px;font-size:13.5px;line-height:1.65;opacity:0;transform:translateY(10px);
+    transition:.22s;pointer-events:none;z-index:20;
+  }
+  #toast.show{opacity:1;transform:translateY(0)}
+  #toast .d{display:flex;gap:10px;margin-top:8px;font-size:12px;color:#a9cbe4;font-variant-numeric:tabular-nums}
+  #tagToast{
+    position:absolute;left:50%;top:86px;transform:translate(-50%,-8px);opacity:0;transition:.25s;z-index:21;
+    background:#12374f;color:#fff;font-size:12px;padding:8px 14px;border-radius:99px;letter-spacing:1px;pointer-events:none;
+  }
+  #tagToast.show{opacity:1;transform:translate(-50%,0)}
+  /* ---------- 全屏层 ---------- */
+  .screen{
+    position:absolute;inset:0;background:#f6fbff;z-index:30;display:flex;flex-direction:column;
+    padding:32px 24px;overflow-y:auto;
+  }
+  .screen.hide{display:none}
+  .kicker{font-size:11px;letter-spacing:4px;color:#7fa8cc;margin-bottom:10px}
+  .screen h2{font-size:26px;font-weight:500;margin:0 0 14px;color:#12374f;line-height:1.35}
+  .screen p{font-size:14px;line-height:1.8;color:#3d5a6d;margin:0 0 12px}
+  .screen .meta{font-size:12px;color:#8fadc2;line-height:1.9;margin-top:auto;padding-top:18px}
+  .btn{
+    font-family:inherit;font-size:15px;border:none;border-radius:14px;padding:15px;width:100%;
+    background:#12374f;color:#f6fbff;letter-spacing:1px;cursor:pointer;margin-top:20px;
+  }
+  .btn.ghost{background:transparent;color:#5b7a8f;border:1px solid #cfe3f4;margin-top:10px}
+  .rules{font-size:12.5px;color:#5b7a8f;line-height:2;margin:14px 0 0}
+  .rules b{font-weight:500;color:#12374f}
+  .endstats{display:flex;gap:8px;margin:18px 0}
+  .endstats div{flex:1;background:#fff;border:1px solid #d8e8f5;border-radius:12px;padding:10px;text-align:center}
+  .endstats span{display:block;font-size:11px;color:#8fadc2;margin-bottom:4px}
+  .endstats b{font-size:16px;font-weight:500;color:#12374f;font-variant-numeric:tabular-nums}
+  .badges{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+  .badge{font-size:11.5px;color:#12374f;background:#e2eff9;border-radius:99px;padding:5px 11px}
+  /* 滑动动画 */
+  .fly-left{animation:flyL .32s forwards}
+  .fly-right{animation:flyR .32s forwards}
+  @keyframes flyL{to{transform:translateX(-120%) rotate(-9deg);opacity:0}}
+  @keyframes flyR{to{transform:translateX(120%) rotate(9deg);opacity:0}}
+  .in{animation:in .28s ease-out}
+  @keyframes in{from{transform:scale(.96);opacity:.4}to{transform:scale(1);opacity:1}}
+  .shake{animation:sh .3s}
+  @keyframes sh{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+</style>
+</head>
+<body data-page-node-id="8AeT9ThIQAzTOSSVSngN3k">
+<div id="app" data-page-node-id="FnYRZBw42WvBVBA4WCliPz">
+  <header data-page-node-id="VoQYfo7Yzp5UhJoE8KBWOP">
+    <div class="toprow" data-page-node-id="Kvlqqog0osCRnLaVBIEf8D">
+      <h1 data-page-node-id="P9FDFGL2b4Bp7NngZFJ3Pv">已读不回</h1>
+      <div class="day" id="dayLabel" data-page-node-id="KCDZ94uzXKFxNTGKCL8QAw">周一 · 09:00</div>
+    </div>
+    <div class="bars" data-page-node-id="J999uTfv9YORWVnZ215WUg">
+      <div class="bar" data-page-node-id="mFMVpJLfWUW8WCn4yDON9E"><div class="lab" data-page-node-id="toMrtgo7RsUZGLefDEgIrN"><span data-page-node-id="ARHHCbtsGiNXNOzl9pubZA">老板信任</span><b id="vBoss" data-page-node-id="uE7nR7rLUBaDNGOUGXivq6">50</b></div><div class="track" data-page-node-id="X4Ez4COhS8ghG4jW36Sfll"><div class="fill boss" id="fBoss" data-page-node-id="R4uHB5EMNjGxenziyBFTmf"></div></div></div>
+      <div class="bar" data-page-node-id="UzBmkRJ8mHAbK5FDBe281C"><div class="lab" data-page-node-id="AbhvUH48e3MGXjCRR0Moe8"><span data-page-node-id="aUrmJ5k8jhPQPcNIT7cHJS">同事关系</span><b id="vPeer" data-page-node-id="H1yDBrxBufuOvhj5TpfQlc">50</b></div><div class="track" data-page-node-id="KOAWd1oLcwTumHmEBlf83L"><div class="fill peer" id="fPeer" data-page-node-id="JHOCU9vXFBmjxWrSJoezP2"></div></div></div>
+      <div class="bar" data-page-node-id="9OJLH8dfsUtF8M7lqybNEh"><div class="lab" data-page-node-id="NDCIg9lt0G8hFXWC48sP4g"><span data-page-node-id="PfbLUZcdlKQFqc5wBJD5bX">精神值</span><b id="vSpirit" data-page-node-id="Ee231f6BRsARKBqij3XARt">50</b></div><div class="track" data-page-node-id="lG6DBwuJd7GVkyMruCCagU"><div class="fill spirit" id="fSpirit" data-page-node-id="yPGW77dqaNfpAsACzLNyuy"></div></div></div>
+    </div>
+    <div class="progress" id="progress" data-page-node-id="l3ULLQgrH9KADDaincHLlb"></div>
+  </header>
+
+  <div id="stage" data-page-node-id="ukj2moKV5SDtjbvyEYiQde">
+    <div class="card" id="card" data-page-node-id="4Gz3UByfL2ERzK4hsGsMVQ">
+      <div class="art" id="art" data-page-node-id="HQnOrxK2kewRl8fO9Dgaoq"></div>
+      <div class="txt" data-page-node-id="0R9jND4svqZD9w4HI9G7od"><p id="face" data-page-node-id="CLsbpe766kv8TRmJNNDiyF"></p></div>
+      <div class="swipe" data-page-node-id="3HfKg1oES2mMoH0qiOQ2zQ"><span data-page-node-id="NEmIenEwtfIZEY32A2Isnj">← 左滑</span><span data-page-node-id="ujFz0jNFVq5sDTtDy1lgic">右滑 →</span></div>
+    </div>
+    <div id="toast" data-page-node-id="un0sNQcoTwHGScRHLGxeOh"></div>
+    <div id="tagToast" data-page-node-id="ISvn1LC2ogNAjbNXC8FDl8"></div>
+  </div>
+
+  <div class="choices" data-page-node-id="tBr8b5IpomTDPnG1yVruHJ">
+    <button class="choice left" id="btnL" data-page-node-id="XwBE5DPqjai7tLbeOED4V8"><span class="hint" data-page-node-id="YUGvagADC4ZmxQm50urZ7c">左</span><span id="txtL" data-page-node-id="RkxZkLvVKoKkQKLugIyQLE"></span></button>
+    <button class="choice right" id="btnR" data-page-node-id="XPN7NcPwaMPlDDXhRG63Fg"><span class="hint" data-page-node-id="MIOybbrgGQXWNc6wQk4LUh">右</span><span id="txtR" data-page-node-id="ciaNECbzM5kTeN91TKDdMj"></span></button>
+  </div>
+
+  <!-- 开始页 -->
+  <div class="screen" id="scrStart" data-page-node-id="BuNGNtwXZzYZEh691VvOdt">
+    <div class="kicker" data-page-node-id="dXnQFqw1PanCXNgKZRpUBI">打工人一周生存指南</div>
+    <h2 data-page-node-id="qC2Co5JYigjg0X3w4uHU4b">撑到周五下班<br data-page-node-id="EQFCwHoJLyChsw3bjBCNrg">就算赢</h2>
+    <p data-page-node-id="sogyzEaysu1NQgaeAsCOWB">你是一名普通上班族。这一周，你会遇到 30 个真实到令人窒息的瞬间。<br data-page-node-id="h2tudNyvPWpxgZO9NzD31e">每个选择都会拉扯三条命脉：老板信任、同事关系、精神值。<br data-page-node-id="ISoPca4MwAeYAd5Fgc43IF">任何一条归零，本周提前结束。</p>
+    <p class="rules" data-page-node-id="3duAKE0KB2cSKJtT7SVs7M">
+      <b data-page-node-id="RwCvnfhmCAX5ZX2rRc2Jpw">左滑</b> 或点左侧按钮 —— 选左边的处理方式<br data-page-node-id="VCjU6QzALzh1p5wV2nmBoW">
+      <b data-page-node-id="md6m90cvXWtMSFXSNjUErW">右滑</b> 或点右侧按钮 —— 选右边的处理方式<br data-page-node-id="Sb9NKKXg6SpygcgkBMIHmx">
+      同一个方向连选 3 次，会形成你的人设，影响后续剧情。
+    </p>
+    <div class="meta" id="startMeta" data-page-node-id="Spb0kDQeGnzxemzjdw33UX"></div>
+    <button class="btn" id="btnStart" data-page-node-id="A7omA7wVFvS5XQ83an7lbN">开始这一周</button>
+  </div>
+
+  <!-- 结局页 -->
+  <div class="screen hide" id="scrEnd" data-page-node-id="ZdV4BHZMIUMy6Fj5uaFcwB">
+    <div class="kicker" id="endKicker" data-page-node-id="mPbVaeoJFbkisvfH3cnhqr">本周结算</div>
+    <h2 id="endTitle" data-page-node-id="2xYMIkwmfBKqdiFXoIGBro"></h2>
+    <p id="endText" data-page-node-id="EGBQL68e4r4RFFLZk9uYJQ"></p>
+    <div class="endstats" data-page-node-id="dtXNuxsx9RActscr897Q5i">
+      <div data-page-node-id="RLL72nIUGpV5dbrwIETWKY"><span data-page-node-id="DYBc7gN0XQoRi8BlqGrhkS">老板信任</span><b id="eBoss" data-page-node-id="lbnGupQtjiV1iYbrMAo8Wk">0</b></div>
+      <div data-page-node-id="QPqb9ogHLMUgZp8TVGubZe"><span data-page-node-id="BYdcnbHOn0POIkq9iDQbuL">同事关系</span><b id="ePeer" data-page-node-id="cxao3DalcwFCgbftxZiuf3">0</b></div>
+      <div data-page-node-id="3XZMPUYswNL7ISCvVrQVAs"><span data-page-node-id="jW2uvTetVCo2kX7aATnsNS">精神值</span><b id="eSpirit" data-page-node-id="JIHgivbd1B6bdsNhzaAr3B">0</b></div>
+    </div>
+    <div class="badges" id="endBadges" data-page-node-id="vH5bjBcVBDVHcYBpB9Zo9p"></div>
+    <div class="meta" id="endMeta" data-page-node-id="K8Y21n34oMGmD6WUnH3Eqm"></div>
+    <button class="btn" id="btnAgain" data-page-node-id="8mA3QmN2djcxXqWHeppTCm">再来一周</button>
+  </div>
+</div>
+
+<script>
+const CARDS = [
+ {id:'M1',sc:'早会',pool:'常驻',face:'周一早会，领导：“我们要对齐颗粒度，形成闭环，用这个抓手赋能业务，打出组合拳。”然后看向你：“你理解了吗？”',
+  L:{t:'点头：“理解了，闭环了”',b:12,s:-10,tag:'卷王',fb:'你点头的频率和你的理解程度成反比。'},
+  R:{t:'“说实话，没懂”',b:-8,p:10,s:5,tag:'发疯文学',fb:'全场安静三秒，领导说：很好，这就是打破信息茧房。'}},
+ {id:'M2',sc:'早会',pool:'常驻',face:'领导：“公司明年计划上市，现在是原始股时期，大家再坚持坚持。”',
+  L:{t:'感动，主动留下来加班',b:15,s:-15,tag:'卷王',fb:'你领的是工资，操的是股东的心。'},
+  R:{t:'内心碎饼，表面微笑营业',b:5,s:-5,tag:'躺平大师',fb:'饼在心中碎了 800 块，脸上纹丝不动。'}},
+ {id:'M3',sc:'早会',pool:'常驻',face:'同事说“我简单补充一点”，然后讲了 15 分钟，会议超时 20 分钟，午饭时间正在流血。',
+  L:{t:'假装记笔记',p:8,s:-8,fb:'你的笔记本上只有一行字：救命。'},
+  R:{t:'灵魂发问“所以结论是什么？”',b:-5,p:-10,s:15,tag:'发疯文学',fb:'会议室安静得能听见空调滴水。'}},
+ {id:'M4',sc:'早会',pool:'常驻',face:'周会要求全员开摄像头，而你还没洗头，背景是一片没叠的被子。',
+  L:{t:'开虚拟背景（马尔代夫海景）',b:-5,p:5,s:10,fb:'领导盯着你的椰子树陷入了沉思。'},
+  R:{t:'关摄像头，谎称网卡',b:-8,s:8,fb:'你的网速只在需要摸鱼时感人。'}},
+ {id:'M5',sc:'早会',pool:'常驻',face:'9:01 打卡，机器弹出“迟到”，一抬头领导正好在电梯口。',
+  L:{t:'主动认错',b:-5,s:-5,fb:'认错速度比电梯还快。'},
+  R:{t:'“刚从客户那回来”',b:5,s:-10,tag:'卷王',fb:'演技满分，良心扣光。'}},
+ {id:'M6',sc:'早会',pool:'常驻',face:'领导：“小牛，你对这个方案有什么看法？”而你刚才在走神思考中午吃什么。',
+  L:{t:'即兴废话文学“方向很好，细节再打磨”',b:10,s:-8,fb:'废话文学的临场巅峰。'},
+  R:{t:'“不好意思，能再说一遍吗”',b:-8,s:5,fb:'诚实很贵，工资不涨。'}},
+ {id:'M7',sc:'早会',pool:'常驻',face:'产品经理：“这个需求很简单，改个按钮颜色，一顿饭的功夫。”',
+  L:{t:'当场接了',b:8,s:-15,fb:'三天后，你改了 47 个关联页面。'},
+  R:{t:'“走排期，下周三给”',b:-5,s:10,fb:'专业的边界感，值 8 个点的信任。'}},
+ {id:'M8',sc:'早会',pool:'常驻',face:'周报被批注：“不够具体，要体现思考深度。”',
+  L:{t:'扩写成 800 字黑话小作文',b:12,s:-12,fb:'你用“深度赋能”四个字写完了“我干完了”。'},
+  R:{t:'如实简洁重交',b:-10,s:5,tag:'躺平大师',fb:'周报的尽头是文学，你选择了现实主义。'}},
+ {id:'M9',sc:'早会',pool:'常驻',face:'领导问“这个 bug 谁负责？”，隔壁同事的眼神开始飘向你。',
+  L:{t:'认领（不是你的锅）',b:8,p:15,s:-15,tag:'老好人',fb:'你替人挡了刀，他回请你一瓶三块钱的冰红茶。'},
+  R:{t:'当场调出聊天记录自证',b:5,p:-15,s:5,fb:'证据链完整，同事关系破碎。'}},
+ {id:'M10',sc:'早会',pool:'常驻',face:'领导：“咱们轻松点，头脑风暴，随便说！”说完全场沉默。',
+  L:{t:'强行输出三个点子',b:10,s:-15,tag:'卷王',fb:'你的活跃换来了三份待写 PPT，采纳一个，落地三个。'},
+  R:{t:'继续沉默，作深思考状',b:-8,s:5,fb:'你的沉默被理解成深谋远虑，运气不错。'}},
+
+ {id:'W1',sc:'工位',pool:'常驻',art:'assets/art-w1.jpg',face:'下午两点，领导微信弹窗：“在吗？”没有下文。',
+  L:{t:'已读不回',b:-20,s:15,tag:'躺平大师',fb:'你享受了 40 分钟宁静，然后电话响了。'},
+  R:{t:'秒回“在的，您说”',b:15,s:-15,tag:'随叫随到',fb:'从此你的“在”就是免费加班券。'}},
+ {id:'W2',sc:'工位',pool:'常驻',face:'你正在逛购物软件，领导站在你身后已经 30 秒。',
+  L:{t:'淡定切屏到文档',b:5,s:-10,fb:'Alt+Tab 的手速是你的核心竞争力。'},
+  R:{t:'“在比价，公司采购参考”',b:-12,p:10,s:8,tag:'发疯文学',fb:'领导笑了，考核表没笑。'}},
+ {id:'W3',sc:'工位',pool:'常驻',face:'同事：“顺路帮我带杯奶茶呗，三分糖去冰加双份芋泥。”而你根本不顺路。',
+  L:{t:'答应绕路',p:15,s:-10,tag:'老好人',fb:'好人卡 +1，迟到风险 +1。'},
+  R:{t:'“我不去那边诶”',p:-10,s:5,fb:'边界的味道，有点苦，但回甘。'}},
+ {id:'W4',sc:'工位',pool:'常驻',face:'你蹲在隔间刷手机已经 25 分钟，门外传来敲门声。',
+  L:{t:'再蹲 10 分钟',b:-5,s:15,fb:'带薪如厕的尽头是痔疮和社会性死亡。'},
+  R:{t:'光速收工回工位',b:5,s:5,fb:'你带着没读完的帖子回到现实。'}},
+ {id:'W5',sc:'工位',pool:'常驻',face:'领导：“周六那个项目，能不能来加个班？调休嘛，以后补。”',
+  L:{t:'答应',b:15,s:-20,tag:'卷王',fb:'“以后补”是职场三大谎言之首，与“马上到”和“简单改改”并列。'},
+  R:{t:'“家里有事，去不了”',b:-12,s:10,tag:'躺平大师',fb:'家里的“事”是睡了 14 个小时。'}},
+ {id:'W6',sc:'工位',pool:'常驻',face:'你收到邮件，同事把项目延期写成“与小牛确认过口径”——而你从没确认过。',
+  L:{t:'回复全组 + 截图澄清',b:5,p:-15,s:10,tag:'发疯文学',fb:'抄送全组，是成年人的反击。'},
+  R:{t:'私聊让他自己改',p:5,b:-5,s:-8,fb:'他改了，字里行间写着“别多事”。'}},
+ {id:'W7',sc:'工位',pool:'常驻',face:'下午 3 点，你困得灵魂出窍，眼皮比 deadline 还重。',
+  L:{t:'冰美式续命',s:15,fb:'咖啡因是打工人的合法兴奋剂。'},
+  R:{t:'隔间带薪小憩',s:10,b:-5,fb:'厕所是打工人的第二办公室。'}},
+ {id:'W8',sc:'工位',pool:'常驻',face:'隔壁工位刷短视频外放，第 8 遍“家人们谁懂啊”。',
+  L:{t:'戴耳机灌成真空',p:5,s:-5,fb:'你戴上了耳机，也戴上了社恐的壳。'},
+  R:{t:'礼貌开口“能戴下耳机吗”',p:-5,s:10,fb:'空气安静了，关系僵了 0.5 格。'}},
+ {id:'W9',sc:'工位',pool:'常驻',face:'打印机又双叒卡纸了，10 分钟后你就要拿这份材料开会。',
+  L:{t:'徒手拆机抢救',b:5,s:-10,fb:'你和打印机总有一个要先疯。'},
+  R:{t:'直接投屏手机讲',b:-5,s:5,fb:'科技以人为本，PPT 以手机为本。'}},
+ {id:'W10',sc:'工位',pool:'常驻',face:'领导端着保温杯开始工位巡游，还有 3 秒到达你的屏幕。',
+  L:{t:'切到工作文档',b:5,s:-5,fb:'你的浏览器永远比文档多一个 Ctrl+W。'},
+  R:{t:'继续改简历',b:-20,s:10,fb:'胆子很大，前程未卜。'}},
+
+ {id:'L1',sc:'午饭',pool:'常驻',face:'同事群里弹出一个链接：“帮我砍一刀，就差 0.01%！”来自三年没跟你说过话的同事。',
+  L:{t:'已读不回',p:-5,s:5,fb:'你守护了钱包，也退出了群聊核心圈。'},
+  R:{t:'点了，还转进家人群',p:10,s:-5,tag:'老好人',fb:'你的社交货币，换成了 0.01% 的进度条。'}},
+ {id:'L2',sc:'午饭',pool:'常驻',face:'同事发起拼单：“满 30 减 8，差你一杯就凑单了！”',
+  L:{t:'跟单（其实不太想喝）',p:10,s:5,fb:'你为省 8 块钱，花了 22 块。'},
+  R:{t:'“我在戒糖”',p:-5,s:5,fb:'戒糖是真的，社恐也是真的。'}},
+ {id:'L3',sc:'午饭',pool:'常驻',face:'外卖软件划了 20 分钟，收藏夹 5 家店，光标在两家之间横跳。',
+  L:{t:'还是点昨天那家',s:8,fb:'人类对抗选择困难的终极方案：重复昨天。'},
+  R:{t:'勇敢试新店',b:-5,s:12,fb:'新店难吃，但你收获了谈资，和迟到 6 分钟。'}},
+ {id:'L4',sc:'午饭',pool:'常驻',face:'12:30，外卖刚打开，群里弹出：“顺便开个短会，15 分钟。”',
+  L:{t:'边扒饭边听',b:8,s:-12,fb:'你的黄焖鸡见证了三个不成立的方案。'},
+  R:{t:'“我午休，下午聊”',b:-8,s:12,tag:'躺平大师',fb:'午休权是自己争取的，虽然手在抖。'}},
+ {id:'L5',sc:'午饭',pool:'常驻',face:'同事神神秘秘凑过来：“你听说没，隔壁组那俩……”',
+  L:{t:'竖起耳朵',b:-5,p:10,s:10,fb:'快乐是真的，下一个主角也可能是你。'},
+  R:{t:'“我不听我不听”',p:-8,s:5,fb:'你保全了清白，错过了全公司最热的连续剧。'}},
+ {id:'L6',sc:'午饭',pool:'常驻',face:'领导给你三天前发的朋友圈点了个赞。',
+  L:{t:'回赞 + 评论“谢谢领导”',b:8,s:-5,fb:'你的社交礼仪全是求生欲。'},
+  R:{t:'装没看见',b:-5,s:5,fb:'假装无事发生，是职场隐身术。'}},
+ {id:'L7',sc:'加班',pool:'常驻',art:'assets/art-l7.jpg',face:'周五 17:55，甲方发来：“小改动，明早要，辛苦。”配一个微笑表情。',
+  L:{t:'连夜改',b:15,s:-20,tag:'卷王',fb:'微笑表情是甲方的免死金牌，你的死期。'},
+  R:{t:'“周一早上给，今晚陪家人”',b:-10,p:5,s:15,tag:'发疯文学',fb:'你活着下了班，甲方气活了。'}},
+ {id:'L8',sc:'下班',pool:'常驻',art:'assets/art-l8.jpg',face:'18:00 了，但领导没走，全组没人动，空气凝固在 17:59。',
+  L:{t:'第一个站起来“我先走啦”',b:-10,p:10,s:15,tag:'发疯文学',fb:'你的一小步，是全组下班的一大步（并没有）。'},
+  R:{t:'坐下假装忙',b:5,s:-15,tag:'卷王',fb:'工位的灯替你活着。'}},
+ {id:'L9',sc:'通勤',pool:'常驻',face:'晚高峰地铁，人群贴脸，工作群弹出“@所有人 明早汇报提前到 9 点”。',
+  L:{t:'当场回“收到”',b:10,s:-10,fb:'你在地铁的人缝里完成了职业素养表演。'},
+  R:{t:'下车再回',b:-5,s:8,tag:'躺平大师',fb:'晚回的 25 分钟，是你最后的体面。'}},
+ {id:'L10',sc:'下班',pool:'常驻',face:'周五下午，领导微信：“在吗，明天有空吗？”',
+  L:{t:'已读，关机静音',b:-20,s:15,tag:'躺平大师',fb:'你关掉了手机。世界安静了。'},
+  R:{t:'秒回“在的！”',b:15,s:-15,tag:'随叫随到',fb:'从此周末是你“自愿”的。'}},
+
+ {id:'T1',sc:'闲聊',pool:'时效',face:'同事问你周末干嘛，你说“没干嘛”。她：“你怎么这么淡啊。”',
+  L:{t:'承认：“对，我是淡人”',p:5,s:8,fb:'淡人的极致：把天聊死且不觉得尴尬。'},
+  R:{t:'装浓人：“安排了！吃喝玩乐走起！”',p:10,s:-10,fb:'你演了两天浓人，周一原形毕露。'}},
+ {id:'T2',sc:'开会',pool:'时效',face:'领导：“有个大项目，这波泼天的富贵轮到咱们组了！”',
+  L:{t:'激动接活',b:12,s:-15,fb:'富贵没接住，接住了三个通宵。'},
+  R:{t:'冷静问“预算和人呢？”',b:-5,s:10,fb:'泼天的富贵，落地需要泼天的资源。'}},
+ {id:'T3',sc:'闲聊',pool:'时效',face:'同事盯着你看了三秒：“你这班味，有点重啊。”',
+  L:{t:'去洗手间洗脸去班味',s:8,fb:'班味洗不掉，但香皂味可以盖。'},
+  R:{t:'“对，我上班的，怎么了”',p:5,s:12,tag:'躺平大师',fb:'承认班味，是与自我和解的第一步。'}}
+];
+
+const DAYS = ['周一','周二','周三','周四','周五'];
+const CARDS_PER_DAY = 6;
+const TAGS = ['卷王','老好人','发疯文学','躺平大师','随叫随到'];
+
+const RULES = {
+  boss0:   {k:'结局 01 · 优化',t:'你被优化了',x:'HR 约你聊 15 分钟，话术比你的周报还熟练。N+1 到账那天，你终于有了创业的资本——一腔怨气。\n临走时你想带走那盆绿萝，HR 说那是公司资产。'},
+  peer0:   {k:'结局 02 · 孤立',t:'全公司最后一个知道你被孤立的人，是你自己',x:'群还在，你发的消息下面只有空气。中午没人喊你吃饭，你一个人点了外卖，还点了两瓶饮料假装有人陪。'},
+  spirit0: {k:'结局 03 · 精神离职',t:'人还在工位，灵魂已办完离职',x:'你成了全公司最稳定的员工——稳定地不想干了。领导夸你最近很平静，你说谢谢，其实你已经在心里辞职 800 遍。'},
+  win:     {k:'结局 04 · 通关',t:'你活着走到了周五 18:00',x:'周报写了，饼吃了，锅推了，会开了，人还在。周末两天，你属于你自己。\n这就是打工人最伟大的胜利：什么都没赢，但什么都没输光。'}
+};
+const TAGBONUS = {
+  '卷王':{t:'卷王结局 · 潜力和活儿',x:'你的工牌在发光，你的眼睛也是。领导说你很有潜力——潜台词是还有更多活。'},
+  '老好人':{t:'老好人结局 · 人缘很好，工资没变',x:'你替所有人挡过刀，同事的表情包里都有你的名字。年终评优名单上没有你，因为你没时间申请。'},
+  '发疯文学':{t:'发疯结局 · 全公司都记得你',x:'全公司都记得你说过的那句话。你不确定这是好是坏，但至少没人再找你开会了。'},
+  '躺平大师':{t:'躺平结局 · 稳定',x:'你把八小时干出了四小时的量。年度评语：稳定。这可能是最高级的褒奖。'},
+  '随叫随到':{t:'随叫随到结局 · 你被记住了',x:'领导周六的会议纪要第一行写着：感谢小牛。第二行：下周继续。'}
+};
+
+const $ = id => document.getElementById(id);
+const store = {
+  get seen(){ try{ return JSON.parse(localStorage.getItem('ydbh_seen')||'[]') }catch(e){ return [] } },
+  set seen(v){ localStorage.setItem('ydbh_seen', JSON.stringify(v)) },
+  get endings(){ try{ return JSON.parse(localStorage.getItem('ydbh_endings')||'[]') }catch(e){ return [] } },
+  set endings(v){ localStorage.setItem('ydbh_endings', JSON.stringify(v)) }
+};
+
+let S = null;
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a }
+
+function buildDeck(){
+  const seen = store.seen;
+  const unseen = CARDS.filter(c=>!seen.includes(c.id));
+  const seenCards = CARDS.filter(c=>seen.includes(c.id));
+  const ordered = shuffle(unseen.slice()).concat(shuffle(seenCards.slice()));
+  const need = DAYS.length * CARDS_PER_DAY;
+  let deck = ordered.slice(0, need);
+  // 时效池卡保证至少出现 1 张
+  if(!deck.some(c=>c.pool==='时效')){
+    const hot = CARDS.find(c=>c.pool==='时效');
+    if(hot){ deck[need-1] = hot }
+  }
+  // 门面卡 W1 或 L10 保证在第一周目出现
+  if(!deck.some(c=>c.id==='W1'||c.id==='L10')){
+    const gate = CARDS.find(c=>c.id==='W1');
+    if(gate){ deck[2] = gate }
+  }
+  return deck;
+}
+
+function startRun(){
+  S = {boss:50,peer:50,spirit:50,tags:{},deck:buildDeck(),i:0,tagStreak:{last:null,count:0},over:false,played:[]};
+  $('scrStart').classList.add('hide');
+  $('scrEnd').classList.add('hide');
+  renderProgress();
+  renderCard();
+}
+
+function renderProgress(){
+  const el = $('progress'); el.innerHTML='';
+  for(let d=0;d<DAYS.length;d++){
+    const div = document.createElement('div');
+    div.className = 'pd' + (S.i >= (d+1)*CARDS_PER_DAY ? ' done' : '');
+    el.appendChild(div);
+  }
+  const dIdx = Math.min(DAYS.length-1, Math.floor(S.i / CARDS_PER_DAY));
+  const hh = [9,10,14,16,17][dIdx];
+  const sum = CARDS_PER_DAY*DAYS.length;
+  $('dayLabel').textContent = `${DAYS[dIdx]} · ${String(hh).padStart(2,'0')}:00 · ${Math.min(S.i+1,sum)}/${sum}`;
+}
+
+function bars(){
+  const v = S || {boss:50,peer:50,spirit:50};
+  $('vBoss').textContent = v.boss; $('fBoss').style.width = v.boss+'%';
+  $('vPeer').textContent = v.peer; $('fPeer').style.width = v.peer+'%';
+  $('vSpirit').textContent = v.spirit; $('fSpirit').style.width = v.spirit+'%';
+}
+
+function renderCard(){
+  const c = S.deck[S.i];
+  if(!c){ return endRun('win') }
+  const art = $('art');
+  art.innerHTML = '';
+  if(c.art){
+    const img = document.createElement('img');
+    img.src = c.art; img.alt = c.sc;
+    img.onerror = () => { art.innerHTML = ph(c) };
+    art.appendChild(img);
+  } else {
+    art.innerHTML = ph(c);
+  }
+  const label = document.createElement('div');
+  label.className = 'tagline';
+  label.textContent = `${c.pool==='时效'?'限时 · ':''}${c.sc}`;
+  art.appendChild(label);
+  $('face').textContent = c.face;
+  $('txtL').textContent = c.L.t;
+  $('txtR').textContent = c.R.t;
+  const card = $('card');
+  card.classList.remove('fly-left','fly-right','in');
+  void card.offsetWidth;
+  card.classList.add('in');
+  bars(); renderProgress();
+}
+
+function ph(c){
+  const idx = S.i+1;
+  return `<div class="ph"><div class="big">${String(idx).padStart(2,'0')}</div><div class="sm">${c.sc}</div></div>`;
+}
+
+function choose(side){
+  if(!S || S.over || S.lock) return;
+  S.lock = true;
+  const c = S.deck[S.i];
+  const opt = side==='L' ? c.L : c.R;
+  const db = opt.b||0, dp = opt.p||0, ds = opt.s||0;
+  S.boss = Math.max(0,Math.min(100,S.boss+db));
+  S.peer = Math.max(0,Math.min(100,S.peer+dp));
+  S.spirit = Math.max(0,Math.min(100,S.spirit+ds));
+  if(!S.played.includes(c.id)) S.played.push(c.id);
+
+  // tag streak
+  if(S.tagStreak.last===side){ S.tagStreak.count++ } else { S.tagStreak.last=side; S.tagStreak.count=1 }
+  if(opt.tag){
+    S.tags[opt.tag] = (S.tags[opt.tag]||0)+1;
+    if(S.tags[opt.tag]===3) showTag(`人设成型：${opt.tag}`);
+  }
+
+  showToast(opt.fb, db, dp, ds);
+  const card = $('card');
+  card.classList.add(side==='L' ? 'fly-left' : 'fly-right');
+  bars();
+
+  setTimeout(()=>{
+    S.i++;
+    S.lock = false;
+    if(S.boss<=0) return endRun('boss0');
+    if(S.peer<=0) return endRun('peer0');
+    if(S.spirit<=0) return endRun('spirit0');
+    if(S.i>=S.deck.length) return endRun('win');
+    renderCard();
+  }, 330);
+}
+
+let toastTimer=null;
+function showToast(text,db,dp,ds){
+  const el = $('toast');
+  const parts = [];
+  if(db) parts.push(`老板信任 ${db>0?'+':''}${db}`);
+  if(dp) parts.push(`同事关系 ${dp>0?'+':''}${dp}`);
+  if(ds) parts.push(`精神值 ${ds>0?'+':''}${ds}`);
+  if(!parts.length) parts.push('状态无变化');
+  el.innerHTML = `${text}<div class="d">${parts.map(p=>`<span>${p}</span>`).join('')}</div>`;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 1500);
+}
+
+let tagTimer=null;
+function showTag(text){
+  const el = $('tagToast');
+  el.textContent = text; el.classList.add('show');
+  clearTimeout(tagTimer);
+  tagTimer = setTimeout(()=>el.classList.remove('show'), 1600);
+}
+
+function endRun(kind){
+  S.over = true;
+  const base = RULES[kind];
+  let title = base.t, text = base.x, kicker = base.k;
+  if(kind==='win'){
+    const top = Object.entries(S.tags).sort((a,b)=>b[1]-a[1])[0];
+    if(top && top[1]>=3 && TAGBONUS[top[0]]){
+      kicker = '结局 04 · 通关 · ' + top[0];
+      text = base.x + '\n\n' + TAGBONUS[top[0]].x;
+    }
+  }
+  $('endKicker').textContent = kicker;
+  $('endTitle').textContent = title;
+  $('endText').textContent = text;
+  $('eBoss').textContent = S.boss; $('ePeer').textContent = S.peer; $('eSpirit').textContent = S.spirit;
+  const bd = $('endBadges'); bd.innerHTML='';
+  Object.entries(S.tags).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>{
+    const d = document.createElement('div'); d.className='badge'; d.textContent = `${k} ×${v}`; bd.appendChild(d);
+  });
+  if(!Object.keys(S.tags).length){
+    const d = document.createElement('div'); d.className='badge'; d.textContent='没有形成任何人设'; bd.appendChild(d);
+  }
+  const seen = store.seen.slice();
+  S.played.forEach(id=>{ if(!seen.includes(id)) seen.push(id) });
+  store.seen = seen;
+  const endings = store.endings.slice();
+  const ekey = kind==='win' ? 'win' : kind;
+  if(!endings.includes(ekey)) endings.push(ekey);
+  store.endings = endings;
+  $('endMeta').textContent = `本周走过 ${S.played.length} 个瞬间 · 累计解锁 ${store.seen.length}/${CARDS.length} 张卡 · 结局 ${store.endings.length}/4`;
+  $('scrEnd').classList.remove('hide');
+}
+
+// 交互：按钮 + 键盘 + 滑动
+$('btnL').addEventListener('click',()=>choose('L'));
+$('btnR').addEventListener('click',()=>choose('R'));
+$('btnStart').addEventListener('click',startRun);
+$('btnAgain').addEventListener('click',startRun);
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft') choose('L');
+  if(e.key==='ArrowRight') choose('R');
+});
+
+let dragging=false, sx=0, sy=0, dx=0;
+const card = $('card');
+card.addEventListener('pointerdown',e=>{
+  if(S && S.over) return;
+  dragging=true; sx=e.clientX; sy=e.clientY; dx=0;
+  card.style.transition='none';
+});
+card.addEventListener('pointermove',e=>{
+  if(!dragging) return;
+  dx = e.clientX - sx;
+  const dy = e.clientY - sy;
+  if(Math.abs(dx)>Math.abs(dy)){
+    card.style.transform = `translateX(${dx}px) rotate(${dx/40}deg)`;
+  }
+});
+function release(){
+  if(!dragging) return;
+  dragging=false;
+  card.style.transition='transform .18s ease-out';
+  if(dx < -60){ card.style.transform=''; choose('L'); }
+  else if(dx > 60){ card.style.transform=''; choose('R'); }
+  else { card.style.transform=''; }
+}
+card.addEventListener('pointerup',release);
+card.addEventListener('pointercancel',release);
+card.addEventListener('pointerleave',release);
+
+// 初始化开始页信息
+(function(){
+  $('startMeta').textContent = `已解锁 ${store.seen.length}/${CARDS.length} 张卡 · 已收集结局 ${store.endings.length}/4`;
+  bars();
+})();
+
+// 自测钩子：?auto=1 自动随机通关，供无头浏览器验证核心循环
+(function(){
+  const q = location.search + location.hash;
+  if(!/auto/.test(q)) return;
+  window.__autoLog = {errors:[], steps:0, ended:false};
+  window.addEventListener('error', e => window.__autoLog.errors.push(String(e.message)));
+  document.documentElement.setAttribute('data-auto','starting');
+  try { startRun(); } catch(err){ document.documentElement.setAttribute('data-auto','startfail:'+err.message); return; }
+  if(/w1/.test(location.hash)){
+    const k = S.deck.findIndex(c=>c.id==='W1');
+    if(k>0){ [S.deck[0],S.deck[k]] = [S.deck[k],S.deck[0]]; renderCard(); }
+  }
+  document.documentElement.setAttribute('data-auto','running');
+  if(/pause/.test(location.hash)) return;
+  const timer = setInterval(()=>{
+    if(!S || S.over){
+      clearInterval(timer);
+      window.__autoLog.ended = true;
+      document.documentElement.setAttribute('data-auto','done');
+      document.documentElement.setAttribute('data-auto-info','steps=' + window.__autoLog.steps + ' i=' + (S?S.i:'-') + ' boss=' + (S?S.boss:'-'));
+      document.title = 'AUTOTEST_DONE';
+      return;
+    }
+    window.__autoLog.steps++;
+    choose(Math.random()<0.5 ? 'L' : 'R');
+  }, 60);
+})();
+
+</script>
+</body>
+</html>
